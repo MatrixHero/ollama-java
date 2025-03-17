@@ -1,6 +1,21 @@
 # Ollama Java Client
 
+[![Java](https://img.shields.io/badge/Java-8+-blue.svg)](https://www.oracle.com/java/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/yourusername/ollama-java)](https://github.com/yourusername/ollama-java/releases)
+
 [English](#english) | [中文](#中文)
+
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+- [Prerequisites](#prerequisites)
+- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Spring Boot Integration](#spring-boot-integration)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 <a name="english"></a>
 # English
@@ -9,24 +24,61 @@ A Java client for the Ollama API, providing a simple and efficient way to intera
 
 ## Features
 
-- Text generation with streaming support
-- Chat functionality
-- Text embedding
-- Model management (list, delete)
-- Full support for Ollama API parameters
-- Comprehensive error handling
-- Detailed logging
+- **Text Generation**
+  - Support for streaming responses
+  - Customizable generation parameters
+  - System prompt and template support
+- **Chat Functionality**
+  - Multi-turn conversation support
+  - Role-based message handling
+  - Streaming chat responses
+- **Text Embedding**
+  - Vector embeddings for text
+  - Support for multiple models
+- **Model Management**
+  - List available models
+  - Delete models
+  - Model information retrieval
+- **Advanced Features**
+  - Full support for Ollama API parameters
+  - Comprehensive error handling
+  - Detailed logging with SLF4J
+  - Spring Boot integration
+  - Configurable HTTP client
 
 ## Installation
 
-Add the following dependency to your `pom.xml`:
+Download the latest release from the [releases page](https://github.com/yourusername/ollama-java/releases) and add it to your project's dependencies.
 
-```xml
-<dependency>
-    <groupId>com.ollama</groupId>
-    <artifactId>ollama-client</artifactId>
-    <version>1.0.0</version>
-</dependency>
+## Prerequisites
+
+- Java 8 or higher
+- Ollama server running locally or accessible via network
+
+### Installing Ollama
+
+1. **macOS**
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+2. **Linux**
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+3. **Windows**
+   - Download the installer from [Ollama's official website](https://ollama.com/download)
+   - Run the installer and follow the setup wizard
+
+After installation, start the Ollama service:
+```bash
+ollama serve
+```
+
+In a new terminal, you can pull the recommended model:
+```bash
+ollama pull qwen2.5:7b
 ```
 
 ## Usage
@@ -156,13 +208,67 @@ The client uses SLF4J for logging. Configure your logging framework to see detai
 </dependency>
 ```
 
+## Spring Boot Integration
+
+If you're using Spring Boot, you can easily integrate the Ollama client:
+
+```java
+@Configuration
+public class OllamaConfig {
+    @Bean
+    public OllamaClient ollamaClient() {
+        return new OllamaClient();
+    }
+}
+```
+
+## Development
+
+### Building from Source
+
+```bash
+git clone https://github.com/yourusername/ollama-java.git
+cd ollama-java
+./gradlew build
+```
+
+### Running Tests
+
+```bash
+./gradlew test
+```
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. Before submitting, please:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## FAQ
+
+### Q: What is the default Ollama server URL?
+A: The client connects to `http://localhost:11434` by default. You can configure a different URL using the `OllamaClient` constructor.
+
+### Q: How do I handle rate limiting?
+A: The client includes built-in retry mechanisms for rate limiting. You can configure retry behavior through the client options.
+
+### Q: Can I use this client with other Ollama models?
+A: Yes, the client supports all Ollama models. We recommend Qwen for best performance, but you can use any model available in your Ollama installation.
+
+## Examples
+
+Check out our [examples directory](examples) for more detailed usage examples:
+- [Basic text generation](examples/src/main/java/com/ollama/examples/GenerateExample.java)
+- [Chat with streaming](examples/src/main/java/com/ollama/examples/ChatStreamExample.java)
+- [Spring Boot integration](examples/src/main/java/com/ollama/examples/spring/SpringBootExample.java)
 
 ---
 
@@ -173,24 +279,61 @@ Ollama API 的 Java 客户端，提供简单高效的方式与 Ollama 的语言�
 
 ## 特性
 
-- 支持流式文本生成
-- 聊天功能
-- 文本嵌入
-- 模型管理（列表、删除）
-- 完整支持 Ollama API 参数
-- 全面的错误处理
-- 详细的日志记录
+- **文本生成**
+  - 支持流式响应
+  - 可定制生成参数
+  - 系统提示词和模板支持
+- **聊天功能**
+  - 多轮对话支持
+  - 基于角色的消息处理
+  - 流式聊天响应
+- **文本嵌入**
+  - 文本向量嵌入
+  - 支持多种模型
+- **模型管理**
+  - 列出可用模型
+  - 删除模型
+  - 模型信息检索
+- **高级功能**
+  - 完整支持 Ollama API 参数
+  - 全面的错误处理
+  - 详细的日志记录
+  - Spring Boot 集成
+  - 可配置的 HTTP 客户端
 
 ## 安装
 
-在 `pom.xml` 中添加以下依赖：
+从 [releases 页面](https://github.com/yourusername/ollama-java/releases) 下载最新版本并添加到你的项目依赖中。
 
-```xml
-<dependency>
-    <groupId>com.ollama</groupId>
-    <artifactId>ollama-client</artifactId>
-    <version>1.0.0</version>
-</dependency>
+## 前置条件
+
+- Java 8 或更高版本
+- 本地运行或通过网络可访问的 Ollama 服务器
+
+### 安装 Ollama
+
+1. **macOS**
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+2. **Linux**
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+3. **Windows**
+   - 从 [Ollama 官网](https://ollama.com/download) 下载安装程序
+   - 运行安装程序并按照安装向导操作
+
+安装完成后，启动 Ollama 服务：
+```bash
+ollama serve
+```
+
+在新的终端中，你可以拉取推荐的模型：
+```bash
+ollama pull qwen2.5:7b
 ```
 
 ## 使用方法
@@ -320,10 +463,58 @@ try {
 </dependency>
 ```
 
+## Spring Boot 集成
+
+如果你使用 Spring Boot，可以轻松集成 Ollama 客户端：
+
+```java
+@Configuration
+public class OllamaConfig {
+    @Bean
+    public OllamaClient ollamaClient() {
+        return new OllamaClient();
+    }
+}
+```
+
+## 开发
+
+### 从源码构建
+
+```bash
+git clone https://github.com/yourusername/ollama-java.git
+cd ollama-java
+./gradlew build
+```
+
+### 运行测试
+
+```bash
+./gradlew test
+```
+
 ## 贡献
 
 贡献是受欢迎的！请随时提交 Pull Request。
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。 
+本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+
+## 常见问题
+
+### Q: Ollama 服务器的默认 URL 是什么？
+A: 客户端默认连接到 `http://localhost:11434`。你可以通过 `OllamaClient` 构造函数配置不同的 URL。
+
+### Q: 如何处理速率限制？
+A: 客户端包含内置的重试机制来处理速率限制。你可以通过客户端选项配置重试行为。
+
+### Q: 我可以使用其他 Ollama 模型吗？
+A: 是的，客户端支持所有 Ollama 模型。我们推荐使用 Qwen 以获得最佳性能，但你也可以使用 Ollama 安装中的任何模型。
+
+## 示例
+
+查看我们的 [examples 目录](examples) 获取更详细的使用示例：
+- [基础文本生成](examples/src/main/java/com/ollama/examples/GenerateExample.java)
+- [流式聊天](examples/src/main/java/com/ollama/examples/ChatStreamExample.java)
+- [Spring Boot 集成](examples/src/main/java/com/ollama/examples/spring/SpringBootExample.java) 
