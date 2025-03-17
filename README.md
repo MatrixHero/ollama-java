@@ -45,6 +45,7 @@ A Java client for the Ollama API, providing a simple and efficient way to intera
   - Detailed logging with SLF4J
   - Spring Boot integration
   - Configurable HTTP client
+  - Customizable timeouts
 
 ## Installation
 
@@ -293,6 +294,84 @@ Check out our [examples directory](examples) for more detailed usage examples:
 - [Chat with streaming](examples/src/main/java/com/ollama/examples/ChatStreamExample.java)
 - [Spring Boot integration](examples/src/main/java/com/ollama/examples/spring/SpringBootExample.java)
 
+### Client Configuration
+
+#### Timeout Settings
+
+You can configure various timeout settings for the client using the builder pattern:
+
+```java
+// Create a client with custom timeouts
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+
+// Or set timeouts individually
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+```
+
+Default timeout values:
+- Connection timeout: 10 seconds
+- Read timeout: 30 seconds
+- Write timeout: 10 seconds
+
+When a timeout occurs, the client will throw an `OllamaTimeoutException` with a descriptive message indicating which operation timed out. You can catch this exception to handle timeout scenarios:
+
+```java
+try {
+    ChatResponse response = client.chat(request);
+} catch (OllamaTimeoutException e) {
+    // Handle timeout
+    System.err.println("Request timed out: " + e.getMessage());
+} catch (IOException e) {
+    // Handle other IO errors
+    System.err.println("IO error: " + e.getMessage());
+}
+```
+
+### 客户端配置
+
+#### 超时设置
+
+你可以使用构建器模式配置客户端的各种超时设置：
+
+```java
+// 创建具有自定义超时的客户端
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+
+// 或者单独设置超时
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+```
+
+默认超时值：
+- 连接超时：10秒
+- 读取超时：30秒
+- 写入超时：10秒
+
+当发生超时时，客户端将抛出带有描述性消息的 `OllamaTimeoutException`，指示哪个操作超时。你可以捕获此异常来处理超时情况：
+
+```java
+try {
+    ChatResponse response = client.chat(request);
+} catch (OllamaTimeoutException e) {
+    // 处理超时
+    System.err.println("请求超时: " + e.getMessage());
+} catch (IOException e) {
+    // 处理其他IO错误
+    System.err.println("IO错误: " + e.getMessage());
+}
+```
+
 ---
 
 <a name="中文"></a>
@@ -323,6 +402,7 @@ Ollama API 的 Java 客户端，提供简单高效的方式与 Ollama 的语言�
   - 详细的日志记录
   - Spring Boot 集成
   - 可配置的 HTTP 客户端
+  - 可自定义的超时设置
 
 ## 安装
 
@@ -550,17 +630,97 @@ cd ollama-java
 ## 常见问题
 
 ### Q: Ollama 服务器的默认 URL 是什么？
-A: 客户端默认连接到 `http://localhost:11434`。你可以通过 `OllamaClient` 构造函数配置不同的 URL。
+A: The client connects to `http://localhost:11434` by default. You can configure a different URL using the `OllamaClient` constructor.
 
 ### Q: 如何处理速率限制？
-A: 客户端包含内置的重试机制来处理速率限制。你可以通过客户端选项配置重试行为。
+A: The client includes built-in retry mechanisms for rate limiting. You can configure retry behavior through the client options.
 
 ### Q: 我可以使用其他 Ollama 模型吗？
-A: 是的，客户端支持所有 Ollama 模型。我们推荐使用 Qwen 以获得最佳性能，但你也可以使用 Ollama 安装中的任何模型。
+A: Yes, the client supports all Ollama models. We recommend Qwen for best performance, but you can use any model available in your Ollama installation.
 
 ## 示例
 
 查看我们的 [examples 目录](examples) 获取更详细的使用示例：
 - [基础文本生成](examples/src/main/java/com/ollama/examples/GenerateExample.java)
 - [流式聊天](examples/src/main/java/com/ollama/examples/ChatStreamExample.java)
-- [Spring Boot 集成](examples/src/main/java/com/ollama/examples/spring/SpringBootExample.java) 
+- [Spring Boot 集成](examples/src/main/java/com/ollama/examples/spring/SpringBootExample.java)
+
+### 客户端配置
+
+#### 超时设置
+
+你可以使用构建器模式配置客户端的各种超时设置：
+
+```java
+// Create a client with custom timeouts
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+
+// Or set timeouts individually
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+```
+
+Default timeout values:
+- Connection timeout: 10 seconds
+- Read timeout: 30 seconds
+- Write timeout: 10 seconds
+
+When a timeout occurs, the client will throw an `OllamaTimeoutException` with a descriptive message indicating which operation timed out. You can catch this exception to handle timeout scenarios:
+
+```java
+try {
+    ChatResponse response = client.chat(request);
+} catch (OllamaTimeoutException e) {
+    // Handle timeout
+    System.err.println("Request timed out: " + e.getMessage());
+} catch (IOException e) {
+    // Handle other IO errors
+    System.err.println("IO error: " + e.getMessage());
+}
+```
+
+### 客户端配置
+
+#### 超时设置
+
+你可以使用构建器模式配置客户端的各种超时设置：
+
+```java
+// 创建具有自定义超时的客户端
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+
+// 或者单独设置超时
+OllamaClient client = new OllamaClient()
+    .withConnectTimeout(60)
+    .withReadTimeout(120)
+    .withWriteTimeout(60);
+```
+
+默认超时值：
+- 连接超时：10秒
+- 读取超时：30秒
+- 写入超时：10秒
+
+当发生超时时，客户端将抛出带有描述性消息的 `OllamaTimeoutException`，指示哪个操作超时。你可以捕获此异常来处理超时情况：
+
+```java
+try {
+    ChatResponse response = client.chat(request);
+} catch (OllamaTimeoutException e) {
+    // 处理超时
+    System.err.println("请求超时: " + e.getMessage());
+} catch (IOException e) {
+    // 处理其他IO错误
+    System.err.println("IO错误: " + e.getMessage());
+}
+```
+
+--- 

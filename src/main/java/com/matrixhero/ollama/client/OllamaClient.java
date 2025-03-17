@@ -2,6 +2,7 @@ package com.matrixhero.ollama.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matrixhero.ollama.client.model.*;
+import com.matrixhero.ollama.client.exception.OllamaTimeoutException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.Iterator;
 import java.util.Spliterators;
+import java.net.SocketTimeoutException;
 
 /**
  * Main client class for interacting with the Ollama API.
@@ -64,6 +66,73 @@ public class OllamaClient implements AutoCloseable {
         this.objectMapper = new ObjectMapper();
     }
 
+    /**
+     * Creates a new OllamaClient with custom timeouts.
+     *
+     * @param host The custom host URL
+     * @param connectTimeout Connection timeout in seconds
+     * @param readTimeout Read timeout in seconds
+     * @param writeTimeout Write timeout in seconds
+     */
+    public OllamaClient(String host, long connectTimeout, long readTimeout, long writeTimeout) {
+        this.host = host;
+        this.client = new OkHttpClient.Builder()
+                .connectTimeout(connectTimeout, TimeUnit.SECONDS)
+                .readTimeout(readTimeout, TimeUnit.SECONDS)
+                .writeTimeout(writeTimeout, TimeUnit.SECONDS)
+                .build();
+        this.objectMapper = new ObjectMapper();
+    }
+
+    /**
+     * Sets the connection timeout for the client.
+     *
+     * @param timeout Timeout in seconds
+     * @return A new OllamaClient instance with the updated timeout
+     */
+    public OllamaClient withConnectTimeout(long timeout) {
+        OkHttpClient newClient = client.newBuilder()
+                .connectTimeout(timeout, TimeUnit.SECONDS)
+                .build();
+        return new OllamaClient(host, newClient, objectMapper);
+    }
+
+    /**
+     * Sets the read timeout for the client.
+     *
+     * @param timeout Timeout in seconds
+     * @return A new OllamaClient instance with the updated timeout
+     */
+    public OllamaClient withReadTimeout(long timeout) {
+        OkHttpClient newClient = client.newBuilder()
+                .readTimeout(timeout, TimeUnit.SECONDS)
+                .build();
+        return new OllamaClient(host, newClient, objectMapper);
+    }
+
+    /**
+     * Sets the write timeout for the client.
+     *
+     * @param timeout Timeout in seconds
+     * @return A new OllamaClient instance with the updated timeout
+     */
+    public OllamaClient withWriteTimeout(long timeout) {
+        OkHttpClient newClient = client.newBuilder()
+                .writeTimeout(timeout, TimeUnit.SECONDS)
+                .build();
+        return new OllamaClient(host, newClient, objectMapper);
+    }
+
+    /**
+     * Creates a new OllamaClient with the specified host, client, and object mapper.
+     * This is a private constructor used internally for creating new instances with modified settings.
+     */
+    private OllamaClient(String host, OkHttpClient client, ObjectMapper objectMapper) {
+        this.host = host;
+        this.client = client;
+        this.objectMapper = objectMapper;
+    }
+
     private String getConfiguredHost() {
         // Try system property first
         String host = System.getProperty(HOST_PROPERTY);
@@ -108,6 +177,7 @@ public class OllamaClient implements AutoCloseable {
      * @param request The generation request containing model and prompt
      * @return The generation response
      * @throws IOException if there's an error communicating with the server
+     * @throws OllamaTimeoutException if the request times out
      */
     public GenerateResponse generate(GenerateRequest request) throws IOException {
         request.setStream(stream);
@@ -117,24 +187,28 @@ public class OllamaClient implements AutoCloseable {
                 .post(RequestBody.create(json, MediaType.parse("application/json")))
                 .build();
 
-        if (stream) {
-            try (Response response = client.newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected response code: " + response);
+        try {
+            if (stream) {
+                try (Response response = client.newCall(httpRequest).execute()) {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("Unexpected response code: " + response);
+                    }
+                    ResponseBody body = response.body();
+                    if (body == null) {
+                        throw new IOException("Empty response body");
+                    }
+                    return objectMapper.readValue(body.string(), GenerateResponse.class);
                 }
-                ResponseBody body = response.body();
-                if (body == null) {
-                    throw new IOException("Empty response body");
+            } else {
+                try (Response response = client.newCall(httpRequest).execute()) {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("Unexpected response code: " + response);
+                    }
+                    return objectMapper.readValue(response.body().string(), GenerateResponse.class);
                 }
-                return objectMapper.readValue(body.string(), GenerateResponse.class);
             }
-        } else {
-            try (Response response = client.newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected response code: " + response);
-                }
-                return objectMapper.readValue(response.body().string(), GenerateResponse.class);
-            }
+        } catch (SocketTimeoutException e) {
+            throw new OllamaTimeoutException("Request timed out while generating text", e);
         }
     }
 
@@ -143,6 +217,7 @@ public class OllamaClient implements AutoCloseable {
      * @param request The generation request containing model and prompt
      * @return A stream of generation responses
      * @throws IOException if there's an error communicating with the server
+     * @throws OllamaTimeoutException if the request times out
      */
     public Stream<GenerateResponse> generateStream(GenerateRequest request) throws IOException {
         request.setStream(true);
@@ -152,42 +227,52 @@ public class OllamaClient implements AutoCloseable {
                 .post(RequestBody.create(json, MediaType.parse("application/json")))
                 .build();
 
-        Response response = client.newCall(httpRequest).execute();
-        if (!response.isSuccessful()) {
-            response.close();
-            throw new IOException("Unexpected response code: " + response);
-        }
-
-        ResponseBody body = response.body();
-        if (body == null) {
-            response.close();
-            throw new IOException("Empty response body");
-        }
-
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<GenerateResponse>() {
-            private final String[] lines = body.string().split("\n");
-            private int currentIndex = 0;
-
-            @Override
-            public boolean hasNext() {
-                return currentIndex < lines.length;
-            }
-
-            @Override
-            public GenerateResponse next() {
-                try {
-                    return objectMapper.readValue(lines[currentIndex++], GenerateResponse.class);
-                } catch (IOException e) {
-                    throw new RuntimeException("Error parsing response", e);
-                }
-            }
-        }, 0), false).onClose(() -> {
-            try {
+        try {
+            Response response = client.newCall(httpRequest).execute();
+            if (!response.isSuccessful()) {
                 response.close();
-            } catch (Exception e) {
-                log.error("Error closing response", e);
+                throw new IOException("Unexpected response code: " + response);
             }
-        });
+
+            ResponseBody body = response.body();
+            if (body == null) {
+                response.close();
+                throw new IOException("Empty response body");
+            }
+
+            return StreamSupport.stream(
+                Spliterators.<GenerateResponse>spliteratorUnknownSize(
+                    new Iterator<GenerateResponse>() {
+                        private final String[] lines = body.string().split("\n");
+                        private int currentIndex = 0;
+
+                        @Override
+                        public boolean hasNext() {
+                            return currentIndex < lines.length;
+                        }
+
+                        @Override
+                        public GenerateResponse next() {
+                            try {
+                                return objectMapper.readValue(lines[currentIndex++], GenerateResponse.class);
+                            } catch (IOException e) {
+                                throw new RuntimeException("Error parsing response", e);
+                            }
+                        }
+                    },
+                    0
+                ),
+                false
+            ).onClose(() -> {
+                try {
+                    response.close();
+                } catch (Exception e) {
+                    log.error("Error closing response", e);
+                }
+            });
+        } catch (SocketTimeoutException e) {
+            throw new OllamaTimeoutException("Request timed out while streaming text generation", e);
+        }
     }
 
     /**
@@ -195,6 +280,7 @@ public class OllamaClient implements AutoCloseable {
      * @param request The chat request containing model and messages
      * @return The chat response
      * @throws IOException if there's an error communicating with the server
+     * @throws OllamaTimeoutException if the request times out
      */
     public ChatResponse chat(ChatRequest request) throws IOException {
         request.setStream(stream);
@@ -204,24 +290,28 @@ public class OllamaClient implements AutoCloseable {
                 .post(RequestBody.create(json, MediaType.parse("application/json")))
                 .build();
 
-        if (stream) {
-            try (Response response = client.newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected response code: " + response);
+        try {
+            if (stream) {
+                try (Response response = client.newCall(httpRequest).execute()) {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("Unexpected response code: " + response);
+                    }
+                    ResponseBody body = response.body();
+                    if (body == null) {
+                        throw new IOException("Empty response body");
+                    }
+                    return objectMapper.readValue(body.string(), ChatResponse.class);
                 }
-                ResponseBody body = response.body();
-                if (body == null) {
-                    throw new IOException("Empty response body");
+            } else {
+                try (Response response = client.newCall(httpRequest).execute()) {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("Unexpected response code: " + response);
+                    }
+                    return objectMapper.readValue(response.body().string(), ChatResponse.class);
                 }
-                return objectMapper.readValue(body.string(), ChatResponse.class);
             }
-        } else {
-            try (Response response = client.newCall(httpRequest).execute()) {
-                if (!response.isSuccessful()) {
-                    throw new IOException("Unexpected response code: " + response);
-                }
-                return objectMapper.readValue(response.body().string(), ChatResponse.class);
-            }
+        } catch (SocketTimeoutException e) {
+            throw new OllamaTimeoutException("Request timed out while chatting", e);
         }
     }
 
@@ -230,6 +320,7 @@ public class OllamaClient implements AutoCloseable {
      * @param request The chat request containing model and messages
      * @return A stream of chat responses
      * @throws IOException if there's an error communicating with the server
+     * @throws OllamaTimeoutException if the request times out
      */
     public Stream<ChatResponse> chatStream(ChatRequest request) throws IOException {
         request.setStream(true);
@@ -239,42 +330,52 @@ public class OllamaClient implements AutoCloseable {
                 .post(RequestBody.create(json, MediaType.parse("application/json")))
                 .build();
 
-        Response response = client.newCall(httpRequest).execute();
-        if (!response.isSuccessful()) {
-            response.close();
-            throw new IOException("Unexpected response code: " + response);
-        }
-
-        ResponseBody body = response.body();
-        if (body == null) {
-            response.close();
-            throw new IOException("Empty response body");
-        }
-
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<ChatResponse>() {
-            private final String[] lines = body.string().split("\n");
-            private int currentIndex = 0;
-
-            @Override
-            public boolean hasNext() {
-                return currentIndex < lines.length;
-            }
-
-            @Override
-            public ChatResponse next() {
-                try {
-                    return objectMapper.readValue(lines[currentIndex++], ChatResponse.class);
-                } catch (IOException e) {
-                    throw new RuntimeException("Error parsing response", e);
-                }
-            }
-        }, 0), false).onClose(() -> {
-            try {
+        try {
+            Response response = client.newCall(httpRequest).execute();
+            if (!response.isSuccessful()) {
                 response.close();
-            } catch (Exception e) {
-                log.error("Error closing response", e);
+                throw new IOException("Unexpected response code: " + response);
             }
-        });
+
+            ResponseBody body = response.body();
+            if (body == null) {
+                response.close();
+                throw new IOException("Empty response body");
+            }
+
+            return StreamSupport.stream(
+                Spliterators.<ChatResponse>spliteratorUnknownSize(
+                    new Iterator<ChatResponse>() {
+                        private final String[] lines = body.string().split("\n");
+                        private int currentIndex = 0;
+
+                        @Override
+                        public boolean hasNext() {
+                            return currentIndex < lines.length;
+                        }
+
+                        @Override
+                        public ChatResponse next() {
+                            try {
+                                return objectMapper.readValue(lines[currentIndex++], ChatResponse.class);
+                            } catch (IOException e) {
+                                throw new RuntimeException("Error parsing response", e);
+                            }
+                        }
+                    },
+                    0
+                ),
+                false
+            ).onClose(() -> {
+                try {
+                    response.close();
+                } catch (Exception e) {
+                    log.error("Error closing response", e);
+                }
+            });
+        } catch (SocketTimeoutException e) {
+            throw new OllamaTimeoutException("Request timed out while streaming chat", e);
+        }
     }
 
     /**
@@ -282,6 +383,7 @@ public class OllamaClient implements AutoCloseable {
      * @param request The embedding request containing model and input text
      * @return The embedding response
      * @throws IOException if there's an error communicating with the server
+     * @throws OllamaTimeoutException if the request times out
      */
     public EmbedResponse embed(EmbedRequest request) throws IOException {
         String json = objectMapper.writeValueAsString(request);
@@ -290,11 +392,15 @@ public class OllamaClient implements AutoCloseable {
                 .post(RequestBody.create(json, MediaType.parse("application/json")))
                 .build();
 
-        try (Response response = client.newCall(httpRequest).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected response code: " + response);
+        try {
+            try (Response response = client.newCall(httpRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected response code: " + response);
+                }
+                return objectMapper.readValue(response.body().string(), EmbedResponse.class);
             }
-            return objectMapper.readValue(response.body().string(), EmbedResponse.class);
+        } catch (SocketTimeoutException e) {
+            throw new OllamaTimeoutException("Request timed out while generating embeddings", e);
         }
     }
 
@@ -302,6 +408,7 @@ public class OllamaClient implements AutoCloseable {
      * Lists all available models.
      * @return The list response containing model information
      * @throws IOException if there's an error communicating with the server
+     * @throws OllamaTimeoutException if the request times out
      */
     public ListResponse list() throws IOException {
         Request httpRequest = new Request.Builder()
@@ -309,11 +416,15 @@ public class OllamaClient implements AutoCloseable {
                 .get()
                 .build();
 
-        try (Response response = client.newCall(httpRequest).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected response code: " + response);
+        try {
+            try (Response response = client.newCall(httpRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected response code: " + response);
+                }
+                return objectMapper.readValue(response.body().string(), ListResponse.class);
             }
-            return objectMapper.readValue(response.body().string(), ListResponse.class);
+        } catch (SocketTimeoutException e) {
+            throw new OllamaTimeoutException("Request timed out while listing models", e);
         }
     }
 
@@ -322,6 +433,7 @@ public class OllamaClient implements AutoCloseable {
      *
      * @param request DeleteRequest containing the model name to delete
      * @throws IOException if the request fails
+     * @throws OllamaTimeoutException if the request times out
      */
     public void delete(DeleteRequest request) throws IOException {
         String json = objectMapper.writeValueAsString(request);
@@ -330,10 +442,14 @@ public class OllamaClient implements AutoCloseable {
             .delete(RequestBody.create(json, MediaType.parse("application/json")))
             .build();
 
-        try (Response response = client.newCall(httpRequest).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected response code: " + response);
+        try {
+            try (Response response = client.newCall(httpRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected response code: " + response);
+                }
             }
+        } catch (SocketTimeoutException e) {
+            throw new OllamaTimeoutException("Request timed out while deleting model", e);
         }
     }
 
