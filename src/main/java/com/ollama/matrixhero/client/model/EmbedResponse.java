@@ -1,4 +1,4 @@
-package com.ollama.client.model;
+package com.ollama.matrixhero.client.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

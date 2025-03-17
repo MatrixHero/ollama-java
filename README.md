@@ -86,32 +86,55 @@ ollama pull qwen2.5:7b
 ### Quick Start
 
 ```java
-import com.ollama.client.OllamaClient;
-import com.ollama.client.model.*;
+import com.ollama.matrixhero.client.OllamaClient;
+import com.ollama.matrixhero.client.model.*;
 
 // Create client
 OllamaClient client = new OllamaClient();
 
 // Generate text
 GenerateRequest request = new GenerateRequest();
-request.setModel("qwen2.5:7b");  // Recommended model
-request.setPrompt("Tell me a story");
+request.
+
+setModel("qwen2.5:7b");  // Recommended model
+request.
+
+setPrompt("Tell me a story");
+
 GenerateResponse response = client.generate(request);
-System.out.println(response.getResponse());
+System.out.
+
+println(response.getResponse());
 
 // Chat
 ChatRequest chatRequest = new ChatRequest();
-chatRequest.setModel("qwen2.5:7b");  // Recommended model
-chatRequest.setMessages(Arrays.asList(
-    new Message(Message.Role.USER, "Hello, how are you?")
+chatRequest.
+
+setModel("qwen2.5:7b");  // Recommended model
+chatRequest.
+
+setMessages(Arrays.asList(
+        new Message(Message.Role.USER, "Hello, how are you?")
 ));
 ChatResponse chatResponse = client.chat(chatRequest);
-System.out.println(chatResponse.getMessage().getContent());
+System.out.
+
+println(chatResponse.getMessage().
+
+getContent());
 
 // Stream generation
-request.setStream(true);
-client.generateStream(request)
-    .forEach(r -> System.out.print(r.getResponse()));
+        request.
+
+setStream(true);
+client.
+
+generateStream(request)
+    .
+
+forEach(r ->System.out.
+
+print(r.getResponse()));
 ```
 
 ### Recommended Model
@@ -341,32 +364,55 @@ ollama pull qwen2.5:7b
 ### 快速开始
 
 ```java
-import com.ollama.client.OllamaClient;
-import com.ollama.client.model.*;
+import com.ollama.matrixhero.client.OllamaClient;
+import com.ollama.matrixhero.client.model.*;
 
 // 创建客户端
 OllamaClient client = new OllamaClient();
 
 // 生成文本
 GenerateRequest request = new GenerateRequest();
-request.setModel("qwen2.5:7b");  // 推荐模型
-request.setPrompt("讲个故事");
+request.
+
+setModel("qwen2.5:7b");  // 推荐模型
+request.
+
+setPrompt("讲个故事");
+
 GenerateResponse response = client.generate(request);
-System.out.println(response.getResponse());
+System.out.
+
+println(response.getResponse());
 
 // 聊天
 ChatRequest chatRequest = new ChatRequest();
-chatRequest.setModel("qwen2.5:7b");  // 推荐模型
-chatRequest.setMessages(Arrays.asList(
-    new Message(Message.Role.USER, "你好，最近怎么样？")
+chatRequest.
+
+setModel("qwen2.5:7b");  // 推荐模型
+chatRequest.
+
+setMessages(Arrays.asList(
+        new Message(Message.Role.USER, "你好，最近怎么样？")
 ));
 ChatResponse chatResponse = client.chat(chatRequest);
-System.out.println(chatResponse.getMessage().getContent());
+System.out.
+
+println(chatResponse.getMessage().
+
+getContent());
 
 // 流式生成
-request.setStream(true);
-client.generateStream(request)
-    .forEach(r -> System.out.print(r.getResponse()));
+        request.
+
+setStream(true);
+client.
+
+generateStream(request)
+    .
+
+forEach(r ->System.out.
+
+print(r.getResponse()));
 ```
 
 ### 推荐模型

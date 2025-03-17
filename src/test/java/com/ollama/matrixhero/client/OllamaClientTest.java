@@ -1,13 +1,13 @@
-package com.ollama.client;
+package com.ollama.matrixhero.client;
 
-import com.ollama.client.model.*;
+import com.ollama.matrixhero.client.model.*;
+import com.ollama.matrixhero.client.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;

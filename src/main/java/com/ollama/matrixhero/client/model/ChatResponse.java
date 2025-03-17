@@ -1,22 +1,23 @@
-package com.ollama.client.model;
+package com.ollama.matrixhero.client.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 /**
- * Text generation response class.
- * Contains the generated text and related performance metrics.
+ * Chat response class.
+ * Contains the chat conversation result and related performance metrics.
  */
 @Data
 @NoArgsConstructor
-public class GenerateResponse {
+public class ChatResponse {
     /** Model name */
     private String model;
     /** Creation timestamp */
     @JsonProperty("created_at")
     private String createdAt;
+    /** Message content */
+    private Message message;
     /** Whether generation is complete */
     private Boolean done;
     /** Reason for completion */
@@ -40,8 +41,4 @@ public class GenerateResponse {
     /** Evaluation duration */
     @JsonProperty("eval_duration")
     private Long evalDuration;
-    /** Generated response text */
-    private String response;
-    /** Context information */
-    private List<Integer> context;
 } 

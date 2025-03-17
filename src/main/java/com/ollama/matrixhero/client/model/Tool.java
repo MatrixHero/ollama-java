@@ -1,4 +1,4 @@
-package com.ollama.client.model;
+package com.ollama.matrixhero.client.model;
 
 import java.util.List;
 import java.util.Map;

@@ -1,11 +1,10 @@
-package com.ollama.client;
+package com.ollama.matrixhero.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ollama.client.model.*;
+import com.ollama.matrixhero.client.model.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
