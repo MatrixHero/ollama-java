@@ -54,4 +54,51 @@ public class ChatRequest {
      * When true, the response will be streamed line by line.
      */
     private Boolean stream;
+
+    private boolean useAgents = true;  // Default to using agents
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+    }
+
+    public boolean isStream() {
+        return stream;
+    }
+
+    public void setStream(boolean stream) {
+        this.stream = stream;
+    }
+
+    public Options getOptions() {
+        return options;
+    }
+
+    public void setOptions(Options options) {
+        this.options = options;
+    }
+
+    public boolean isUseAgents() {
+        return useAgents;
+    }
+
+    public void setUseAgents(boolean useAgents) {
+        this.useAgents = useAgents;
+    }
+
+    public ChatRequest withUseAgents(boolean useAgents) {
+        this.useAgents = useAgents;
+        return this;
+    }
 } 

@@ -333,44 +333,43 @@ try {
 }
 ```
 
-### 客户端配置
+### Agent Support
 
-#### 超时设置
-
-你可以使用构建器模式配置客户端的各种超时设置：
+The client supports integration with external APIs through agents. Here's how to use agents:
 
 ```java
-// 创建具有自定义超时的客户端
-OllamaClient client = new OllamaClient()
-    .withConnectTimeout(60)
-    .withReadTimeout(120)
-    .withWriteTimeout(60);
+// Create a weather agent (API key will be loaded from environment or system properties)
+WeatherAgent weatherAgent = new WeatherAgent();
 
-// 或者单独设置超时
+// Add the agent to the client
 OllamaClient client = new OllamaClient()
-    .withConnectTimeout(60)
-    .withReadTimeout(120)
-    .withWriteTimeout(60);
+    .withAgent(weatherAgent);
+
+// Now you can chat with the model, and it will automatically use the weather agent when appropriate
+ChatRequest request = new ChatRequest();
+request.setModel("qwen2.5:7b");
+request.setMessages(Arrays.asList(
+    new Message(Message.Role.USER, "What's the weather in New York?")
+));
+ChatResponse response = client.chat(request);
+System.out.println(response.getMessage().getContent());
 ```
 
-默认超时值：
-- 连接超时：10秒
-- 读取超时：30秒
-- 写入超时：10秒
+#### API Key Configuration
 
-当发生超时时，客户端将抛出带有描述性消息的 `OllamaTimeoutException`，指示哪个操作超时。你可以捕获此异常来处理超时情况：
+For agents that require API keys (like WeatherAgent), you can configure them in two ways:
 
-```java
-try {
-    ChatResponse response = client.chat(request);
-} catch (OllamaTimeoutException e) {
-    // 处理超时
-    System.err.println("请求超时: " + e.getMessage());
-} catch (IOException e) {
-    // 处理其他IO错误
-    System.err.println("IO错误: " + e.getMessage());
-}
+1. Environment Variable:
+```bash
+export OPENWEATHERMAP_API_KEY=your_api_key_here
 ```
+
+2. System Property:
+```bash
+java -Dopenweathermap.api.key=your_api_key_here -jar your-application.jar
+```
+
+The agent will first check for the environment variable, then fall back to the system property. If neither is found, it will throw an `IllegalStateException` with a helpful message.
 
 ---
 
@@ -684,43 +683,42 @@ try {
 }
 ```
 
-### 客户端配置
+### Agent Support
 
-#### 超时设置
-
-你可以使用构建器模式配置客户端的各种超时设置：
+客户端支持通过 agents 集成外部 API。以下是使用 agents 的方法：
 
 ```java
-// 创建具有自定义超时的客户端
-OllamaClient client = new OllamaClient()
-    .withConnectTimeout(60)
-    .withReadTimeout(120)
-    .withWriteTimeout(60);
+// 创建天气 agent（API key 将从环境变量或系统属性中加载）
+WeatherAgent weatherAgent = new WeatherAgent();
 
-// 或者单独设置超时
+// 将 agent 添加到客户端
 OllamaClient client = new OllamaClient()
-    .withConnectTimeout(60)
-    .withReadTimeout(120)
-    .withWriteTimeout(60);
+    .withAgent(weatherAgent);
+
+// 现在你可以与模型聊天，当输入合适时它会自动使用天气 agent
+ChatRequest request = new ChatRequest();
+request.setModel("qwen2.5:7b");
+request.setMessages(Arrays.asList(
+    new Message(Message.Role.USER, "北京天气如何？")
+));
+ChatResponse response = client.chat(request);
+System.out.println(response.getMessage().getContent());
 ```
 
-默认超时值：
-- 连接超时：10秒
-- 读取超时：30秒
-- 写入超时：10秒
+#### API Key 配置
 
-当发生超时时，客户端将抛出带有描述性消息的 `OllamaTimeoutException`，指示哪个操作超时。你可以捕获此异常来处理超时情况：
+对于需要 API key 的 agents（如 WeatherAgent），你可以通过两种方式配置：
 
-```java
-try {
-    ChatResponse response = client.chat(request);
-} catch (OllamaTimeoutException e) {
-    // 处理超时
-    System.err.println("请求超时: " + e.getMessage());
-} catch (IOException e) {
-    // 处理其他IO错误
-    System.err.println("IO错误: " + e.getMessage());
-}
+1. 环境变量：
+```bash
+export OPENWEATHERMAP_API_KEY=your_api_key_here
 ```
+
+2. 系统属性：
+```bash
+java -Dopenweathermap.api.key=your_api_key_here -jar your-application.jar
+```
+
+agent 会首先检查环境变量，如果没有找到则使用系统属性。如果两者都没有找到，它会抛出一个带有帮助信息的 `IllegalStateException`。
 
 --- 

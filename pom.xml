@@ -4,34 +4,48 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.matrixhero.group</groupId>
-    <artifactId>ollama-client</artifactId>
+    <groupId>com.matrixhero</groupId>
+    <artifactId>ollama-java</artifactId>
     <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Ollama Java Client</name>
+    <description>A Java client for the Ollama API, providing a simple and efficient way to interact with Ollama's language models.</description>
+    <url>https://github.com/yourusername/ollama-java</url>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <okhttp.version>4.9.3</okhttp.version>
-        <jackson.version>2.13.0</jackson.version>
-        <lombok.version>1.18.22</lombok.version>
-        <junit.version>5.8.2</junit.version>
-        <mockito.version>4.5.1</mockito.version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <jackson.version>2.15.2</jackson.version>
+        <okhttp.version>4.11.0</okhttp.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <lombok.version>1.18.30</lombok.version>
+        <junit.version>5.9.2</junit.version>
+        <mockito.version>5.3.1</mockito.version>
     </properties>
 
     <dependencies>
-        <!-- HTTP Client -->
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- OkHttp -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version>
         </dependency>
 
-        <!-- JSON Processing -->
+        <!-- SLF4J -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <!-- Lombok -->
@@ -42,19 +56,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.32</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.6</version>
-        </dependency>
-
-        <!-- Testing -->
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -83,25 +85,25 @@
 
     <build>
         <plugins>
+            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Test.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
+
+            <!-- Source Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -116,6 +118,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Javadoc Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -129,6 +133,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- GPG Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -143,6 +149,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Nexus Staging Plugin -->
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -150,24 +158,65 @@
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <distributionManagement>
-<!--        <snapshotRepository>-->
-<!--            <id>ossrh</id>-->
-<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-<!--            <snapshotRepository>-->
-<!--                <enabled>true</enabled>-->
-<!--            </snapshotRepository>-->
-<!--        </snapshotRepository>-->
-<!--        <repository>-->
-<!--            <id>ossrh</id>-->
-<!--            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
-<!--        </repository>-->
-    </distributionManagement>
+    <profiles>
+        <profile>
+            <id>ossrh</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <distributionManagement>
+<!--                <snapshotRepository>-->
+<!--                    <id>ossrh</id>-->
+<!--                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>-->
+<!--                    <snapshotRepository>-->
+<!--                        <uniqueVersion>false</uniqueVersion>-->
+<!--                    </snapshotRepository>-->
+<!--                    <releases>-->
+<!--                        <enabled>false</enabled>-->
+<!--                    </releases>-->
+<!--                    <snapshots>-->
+<!--                        <enabled>true</enabled>-->
+<!--                    </snapshots>-->
+<!--                </snapshotRepository>-->
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+
+    <scm>
+        <connection>scm:git:git://github.com/yourusername/ollama-java.git</connection>
+        <developerConnection>scm:git:ssh://github.com:yourusername/ollama-java.git</developerConnection>
+        <url>https://github.com/yourusername/ollama-java/tree/main</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>yourusername</id>
+            <name>Your Name</name>
+            <email>your.email@example.com</email>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
 </project> 

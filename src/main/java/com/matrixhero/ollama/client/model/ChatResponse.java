@@ -11,6 +11,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ChatResponse {
+    public ChatResponse(Message message) {
+        this.message = message;
+    }
+
     /** Model name */
     private String model;
     /** Creation timestamp */
