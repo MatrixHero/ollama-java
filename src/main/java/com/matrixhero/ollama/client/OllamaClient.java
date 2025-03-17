@@ -1,7 +1,7 @@
-package com.ollama.matrixhero.client;
+package com.matrixhero.ollama.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ollama.matrixhero.client.model.*;
+import com.matrixhero.ollama.client.model.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import java.io.IOException;

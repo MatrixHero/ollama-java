@@ -86,8 +86,8 @@ ollama pull qwen2.5:7b
 ### Quick Start
 
 ```java
-import com.ollama.matrixhero.client.OllamaClient;
-import com.ollama.matrixhero.client.model.*;
+import com.matrixhero.ollama.client.OllamaClient;
+import com.matrixhero.ollama.client.model.*;
 
 // Create client
 OllamaClient client = new OllamaClient();
@@ -364,8 +364,8 @@ ollama pull qwen2.5:7b
 ### 快速开始
 
 ```java
-import com.ollama.matrixhero.client.OllamaClient;
-import com.ollama.matrixhero.client.model.*;
+import com.matrixhero.ollama.client.OllamaClient;
+import com.matrixhero.ollama.client.model.*;
 
 // 创建客户端
 OllamaClient client = new OllamaClient();

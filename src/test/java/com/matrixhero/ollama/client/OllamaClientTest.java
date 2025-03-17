@@ -1,7 +1,6 @@
-package com.ollama.matrixhero.client;
+package com.matrixhero.ollama.client;
 
-import com.ollama.matrixhero.client.model.*;
-import com.ollama.matrixhero.client.model.*;
+import com.matrixhero.ollama.client.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
