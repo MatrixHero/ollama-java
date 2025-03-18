@@ -300,15 +300,22 @@ public class OllamaClient implements AutoCloseable {
             throw new IllegalArgumentException("Chat request and messages cannot be null or empty");
         }
 
-        request.setStream(false);  // Ensure non-streaming mode
+        // Ensure non-streaming mode
+        request.setStream(false);
         Message lastMessage = getLastMessage(request);
         
         // Try to use agent if enabled
         ChatResponse agentResponse = tryUseAgent(request, lastMessage);
         if (agentResponse != null) {
-            return agentResponse;
+            request.getMessages().add(new Message(Message.Role.ASSISTANT,
+                    agentResponse.getMessage().getContent()));
         }
-
+        String systemPrompt = "你是一个专业的助手。请遵循以下规则：\n" +
+                "1. 用简洁的语言回答问题\n" +
+                "2. 始终用中文回答\n" +
+                "3. 参考历史对话内容\n" +
+                "4. 避免重复回答";
+        request.setSystem(request.getSystem() + ", " + systemPrompt);
         // If no suitable agent found or agents disabled, use model
         return callModel(request);
     }
