@@ -3,6 +3,8 @@ package com.matrixhero.ollama.client.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +25,12 @@ public class ChatRequest {
      * Each message has a role (user/assistant) and content.
      */
     private List<Message> messages;
+
+    /**
+     * System prompt to set the behavior of the model.
+     * This is optional and can be used to provide context or instructions to the model.
+     */
+    private String system;
 
     /**
      * The list of tools available to the model.
@@ -66,11 +74,22 @@ public class ChatRequest {
     }
 
     public List<Message> getMessages() {
+        if (messages == null) {
+            messages = new ArrayList<>();
+        }
         return messages;
     }
 
     public void setMessages(List<Message> messages) {
-        this.messages = messages;
+        this.messages = new ArrayList<>(messages);
+    }
+
+    public String getSystem() {
+        return system;
+    }
+
+    public void setSystem(String system) {
+        this.system = system;
     }
 
     public boolean isStream() {

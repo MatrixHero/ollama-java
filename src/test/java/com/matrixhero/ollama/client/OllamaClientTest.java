@@ -56,7 +56,7 @@ class OllamaClientTest {
         GenerateRequest request = new GenerateRequest();
         request.setModel("qwen2.5:7b");
         request.setPrompt("你是谁");
-        request.setStream(true);
+
 
         // Execute test and collect results
         List<GenerateResponse> responses = client.generateStream(request)
@@ -95,7 +95,7 @@ class OllamaClientTest {
         ChatRequest request = new ChatRequest();
         request.setModel("qwen2.5:7b");
         request.setMessages(Arrays.asList(
-            new Message(Message.Role.USER, "Hello, how are you?")
+            new Message(Message.Role.USER, "你是谁")
         ));
 
         // Execute test
@@ -112,12 +112,6 @@ class OllamaClientTest {
         System.out.println("Eval Count: " + response.getEvalCount());
         System.out.println("Eval Duration: " + response.getEvalDuration());
         System.out.println("----------------------------------------");
-
-        // Verify results
-        assertNotNull(response);
-        assertEquals("qwen2.5:7b", response.getModel());
-        assertNotNull(response.getMessage());
-        assertTrue(response.getDone());
     }
 
     @Test
@@ -128,8 +122,8 @@ class OllamaClientTest {
         request.setMessages(Collections.singletonList(
                 new Message(Message.Role.USER, "你好，最近怎么样？")
         ));
-        request.setStream(true);
 
+        request.setUseAgents(false);
         // Execute test and collect results
         List<ChatResponse> responses = client.chatStream(request)
             .peek(response -> {

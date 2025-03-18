@@ -22,7 +22,10 @@ public class WeatherAgent implements Agent {
     private static final String API_KEY_ENV = "OPENWEATHERMAP_API_KEY";
     private static final String API_KEY_PROPERTY = "openweathermap.api.key";
     private static final String CONFIG_FILE = "application.properties";
-    private static final Pattern WEATHER_PATTERN = Pattern.compile(".*weather.*|.*temperature.*|.*temperature.*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern WEATHER_PATTERN = Pattern.compile(
+            ".*weather.*|.*temperature.*|.*天气.*|.*气温.*|.*温度.*|.*下雨.*|.*晴.*|.*阴.*",
+            Pattern.CASE_INSENSITIVE
+    );
     private final String apiKey;
     private final OkHttpClient client;
     private final ObjectMapper objectMapper;
@@ -134,6 +137,7 @@ public class WeatherAgent implements Agent {
         ChatRequest request = new ChatRequest();
         request.setModel(model);
         request.setStream(false);
+        request.setUseAgents(false);  // Disable agents to prevent recursive calls
         request.setMessages(Arrays.asList(
             new Message(Message.Role.SYSTEM, "You are a city name extractor. Extract city names in Chinese or English, then convert to English names."),
             new Message(Message.Role.USER, prompt)

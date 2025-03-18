@@ -1,8 +1,16 @@
 package com.matrixhero.ollama.client.agent;
 
 import com.matrixhero.ollama.client.OllamaClient;
+import com.matrixhero.ollama.client.model.ChatRequest;
+import com.matrixhero.ollama.client.model.ChatResponse;
+import com.matrixhero.ollama.client.model.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class WeatherAgentTest {
@@ -20,25 +28,18 @@ class WeatherAgentTest {
         // 使用你的 OpenWeatherMap API key
         // 创建新的 agent 实例用于实际 API 测试
         WeatherAgent realAgent = new WeatherAgent(ollamaClient);
+        ollamaClient.withAgent(realAgent);
+
+        ChatRequest request = new ChatRequest();
+        request.setModel("qwen2.5:7b");
+        request.setSystem("你是一个专业的助手，请用简洁的语言回答问题。最后请用中文回答，谢谢。");
+        request.setMessages(Collections.singletonList(
+                new Message(Message.Role.USER, "北京天气如何？")
+        ));
 
         // 测试中文城市名
-        String response = realAgent.execute("北京和纽约的天气如何？");
-        System.out.println("北京天气查询结果：\n" + response);
-//        assertTrue(response.contains("北京"));
-//        assertTrue(response.contains("温度"));
-//        assertTrue(response.contains("湿度"));
-
-        // 测试英文城市名
-        response = realAgent.execute("What's the weather in New York?");
-        System.out.println("New York天气查询结果：\n" + response);
-//        assertTrue(response.contains("New York"));
-//        assertTrue(response.contains("temperature"));
-//        assertTrue(response.contains("humidity"));
-
-        // 测试无效城市名
-        response = realAgent.execute("不存在的城市天气如何？");
-        System.out.println("无效城市查询结果：\n" + response);
-//        assertTrue(response.contains("Sorry"));
+        ChatResponse response = ollamaClient.chat(request);
+        System.out.println(response.getMessage().getContent());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.matrixhero.ollama.client.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
@@ -16,6 +17,10 @@ public class Message {
     public Message(Role role, String content) {
         this.role = role;
         this.content = content;
+    }
+
+    public static Message builder() {
+        return new Message();
     }
 
     /**
@@ -40,6 +45,38 @@ public class Message {
     private List<Image> images;
     /** List of tool calls */
     private List<ToolCall> toolCalls;
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
+
+    public List<ToolCall> getToolCalls() {
+        return toolCalls;
+    }
+
+    public void setToolCalls(List<ToolCall> toolCalls) {
+        this.toolCalls = toolCalls;
+    }
 
     /**
      * Represents a tool call in the message
